@@ -1,0 +1,31 @@
+name: Build DevVision DLL
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Show repo layout
+        run: dir /b /s
+
+      - name: Build with MSBuild
+        shell: cmd
+        run: msbuild DevVision.csproj /p:Configuration=Release
+
+      - name: Verify output DLL
+        shell: cmd
+        run: |
+          if exist "bin\Release\DevVision.dll" ( echo "DLL built" & dir bin\Release ) else ( echo "DLL not found" & exit 1 )
+
+      - name: Upload artifact (DevVision.dll)
+        uses: actions/upload-artifact@v4
+        with:
+          name: DevVision.dll
+          path: bin/Release/DevVision.dll
