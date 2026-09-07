@@ -1,0 +1,24 @@
+  - name: Setup .NET SDK
+    uses: actions/setup-dotnet@v4
+    with:
+      dotnet-version: '7.0.x'
+
+  - name: Restore
+    run: dotnet restore DevVision.csproj
+
+  - name: Build (Release)
+    run: dotnet build DevVision.csproj --configuration Release --no-restore
+
+  - name: Find and copy built DevVision.dll
+    shell: powershell
+    run: |
+      $dll = Get-ChildItem -Path . -Filter DevVision.dll -Recurse -File | Select-Object -First 1
+      if (-not $dll) { Write-Error "DevVision.dll not found"; exit 1 }
+      Copy-Item $dll.FullName -Destination DevVision.dll -Force
+
+  - name: Upload artifact
+    uses: actions/upload-artifact@v4
+    with:
+      name: DevVision-dll
+      path: DevVision.dll
+      
