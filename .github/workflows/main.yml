@@ -1,30 +1,19 @@
- path: bin/Release/DevVision.dllname: Build DevVision DLL
+  - name: Setup .NET SDK
+    uses: actions/setup-dotnet@v4
+    with:
+      dotnet-version: '7.0.x'
 
-on:
-  push:
-    branches: [ main, master ]
-  workflow_dispatch:
+  - name: Restore
+    run: dotnet restore DevVision.csproj
 
-jobs:
-  build:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+  - name: Build (Release)
+    run: dotnet build DevVision.csproj --configuration Release --no-restore
 
-      - name: Show repo layout
-        run: dir /b /s
+  - name: List files (debug)
+    run: dir /s /b
 
-      - name: Build with MSBuild
-        shell: cmd
-        run: msbuild DevVision.csproj /p:Configuration=Release
-
-      - name: Verify output DLL
-        shell: cmd
-        run: |
-          if exist "bin\Release\DevVision.dll" ( echo "DLL built" & dir bin\Release ) else ( echo "DLL not found" & exit 1 )
-
-      - name: Upload artifact (DevVision.dll)
-        uses: actions/upload-artifact@v4
-        with:
-          name: DevVision.dll
+  - name: Upload artifact
+    uses: actions/upload-artifact@v4
+    with:
+      name: DevVision-dll
+      path: '**/bin/**/Release/*.dll'
